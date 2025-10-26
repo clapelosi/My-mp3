@@ -1,0 +1,19 @@
+# ignore all files: .csv, .json, .xml, .mp4, .mp3, .wav, .flac
+*.csv
+*.json
+*.xml
+*.mp4
+*.mp3
+*.wav
+*.flac
+
+# ingonre venv folder
+venv/
+
+# ingore __pycache__ folder
+__pycache__/
+# ignore .env files
+.env
+
+# ingonre all _pycache__ folders in subdirectories
+**/__pycache__/

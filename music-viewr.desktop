@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Music Viewer
+Exec=/usr/bin/python3 /home/clapelosi/MusicaPlayer/music_viewer.py %f
+Icon=multimedia-player
+MimeType=audio/mpeg;audio/x-flac;audio/x-wav;audio/ogg;
+Terminal=false
+Categories=AudioVideo;Player;
