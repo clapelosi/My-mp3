@@ -17,3 +17,12 @@ __pycache__/
 
 # ingonre all _pycache__ folders in subdirectories
 **/__pycache__/
+
+# ignore sh
+*.sh
+
+# ingore log files
+*.log
+
+# ingore .db files
+*.db
