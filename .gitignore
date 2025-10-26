@@ -18,8 +18,13 @@ __pycache__/
 # ingonre all _pycache__ folders in subdirectories
 **/__pycache__/
 
-# ignore sh
+# ignore all the .sh
 *.sh
+*.desktop
+
+
+make_app.sh 
+music-viewer.sh 
 
 # ingore log files
 *.log

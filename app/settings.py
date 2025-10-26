@@ -11,7 +11,7 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Percorso del database SQLite
-DATABASE_PATH = os.path.join(PROJECT_ROOT, 'music-player.db')
+DATABASE_PATH = os.path.join(PROJECT_ROOT, 'db/music-player.db')
 COVERS_BASE_PATH = os.path.join(os.path.expanduser('~'), 'Desktop', 'copertine')
 
 # --- Impostazioni della UI ---
