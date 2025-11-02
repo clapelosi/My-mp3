@@ -1,3 +1,4 @@
 pandas
 python-vlc
 Pillow
+# sqlite3

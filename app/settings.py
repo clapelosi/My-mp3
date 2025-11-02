@@ -11,11 +11,13 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Percorso del database SQLite
-DATABASE_PATH = os.path.join(PROJECT_ROOT, 'db/music-player.db')
+DATABASE_PATH = os.path.join(PROJECT_ROOT, 'db', 'music-player.db')
+
+# Percorso delle copertine path -> deprecato
 COVERS_BASE_PATH = os.path.join(os.path.expanduser('~'), 'Desktop', 'copertine')
 
 # --- Impostazioni della UI ---
-WINDOW_TITLE = "Music Player DB"
+WINDOW_TITLE = "MyMP3-@cla.pelosi"
 BACKGROUND_COLOR = "#2e2e2e"
 PRIMARY_COLOR = "#1e90ff"
 TEXT_COLOR = "white"
