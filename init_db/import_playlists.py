@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import glob
 import os
+import re
 
 def create_database_tables(cursor):
     """Crea le tabelle 'playlists' e 'playlist_songs' se non esistono."""
@@ -57,7 +58,18 @@ def import_playlists_from_csv(db_path, csv_folder_path):
         try:
             # Estrai il nome della playlist dal nome del file
             cluster_num = os.path.basename(csv_file).replace('.csv', '')
-            playlist_name = cluster_num
+
+            # 1. Rimuovo "playlist_1_" iniziale
+            cluster_num = re.sub(r'^playlist_\d+_', '', cluster_num)
+
+            # 2. Sostituisco "_" con spazio
+            cluster_num = cluster_num.replace('_', ' ')
+
+            # 3. Sostituisco "-" con spazio e capitalizzo ogni parola
+            cluster_num = ' '.join(word.capitalize() for word in cluster_num.split('-')).replace('-', ' ')
+
+            # 4. Capitalizzo le parole separate da spazio (tipo canzone -> Canzone)
+            playlist_name = ' '.join(word.capitalize() if not re.match(r'\d', word) else word for word in cluster_num.split())
 
             # Inserisci la nuova playlist nella tabella 'playlists'
             cursor.execute("INSERT INTO playlists (name) VALUES (?)", (playlist_name,))
@@ -89,7 +101,7 @@ def import_playlists_from_csv(db_path, csv_folder_path):
 
 if __name__ == '__main__':
     DATABASE_PATH = os.path.join('db','music-player.db')
-    CSV_FOLDER = os.path.join('init_db','data', 'csv_new')
+    CSV_FOLDER = os.path.join('init_db','data', 'csv2')
     import_playlists_from_csv(DATABASE_PATH, CSV_FOLDER)
 
 

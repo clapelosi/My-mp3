@@ -39,6 +39,7 @@ class App:
         """
         self.root = root
         self.root.title(settings.WINDOW_TITLE)
+        self.root.geometry("2200x1600")
         self.root.configure(bg=settings.BACKGROUND_COLOR)
 
         # Connessione al database SQLite
@@ -151,7 +152,7 @@ class App:
               fg=settings.TEXT_COLOR, font=(settings.FONT_FAMILY, 12)).pack(side='left')
 
         # === COLONNA DESTRA ===
-        right_frame = Frame(main_frame, bg=settings.BACKGROUND_COLOR, width=250)
+        right_frame = Frame(main_frame, bg=settings.BACKGROUND_COLOR, width=600)
         right_frame.pack(side='right', fill='y', expand=False, padx=(10, 0))
         right_frame.pack_propagate(False)  # Impedisce al frame di ridimensionarsi
 

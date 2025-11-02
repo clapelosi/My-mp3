@@ -19,6 +19,7 @@ COVERS_BASE_PATH = os.path.join(os.path.expanduser('~'), 'Desktop', 'copertine')
 # --- Impostazioni della UI ---
 WINDOW_TITLE = "MyMP3-@cla.pelosi"
 BACKGROUND_COLOR = "#2e2e2e"
+BG_SONGS_COLOR= "#95c9c2"
 PRIMARY_COLOR = "#1e90ff"
 TEXT_COLOR = "white"
 MUTED_TEXT_COLOR = "lightgrey"
