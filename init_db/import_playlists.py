@@ -42,7 +42,9 @@ def import_playlists_from_csv(db_path, csv_folder_path):
     conn.commit()
 
 
-    csv_files = glob.glob(os.path.join(csv_folder_path, 'playlist_cluster_New_*.csv'))
+    csv_files = glob.glob(os.path.join(csv_folder_path, '*.csv'))
+    print(csv_files)
+    print(csv_folder_path)
 
     if not csv_files:
         print(f"Nessun file CSV trovato in {csv_folder_path}")
@@ -54,8 +56,8 @@ def import_playlists_from_csv(db_path, csv_folder_path):
     for csv_file in csv_files:
         try:
             # Estrai il nome della playlist dal nome del file
-            cluster_num = os.path.basename(csv_file).replace('playlist_cluster_New_', '').replace('.csv', '')
-            playlist_name = f"Cluster {cluster_num}"
+            cluster_num = os.path.basename(csv_file).replace('.csv', '')
+            playlist_name = cluster_num
 
             # Inserisci la nuova playlist nella tabella 'playlists'
             cursor.execute("INSERT INTO playlists (name) VALUES (?)", (playlist_name,))
@@ -86,8 +88,8 @@ def import_playlists_from_csv(db_path, csv_folder_path):
     conn.close()
 
 if __name__ == '__main__':
-    DATABASE_PATH = 'music-player.db'
-    CSV_FOLDER = os.path.join('data', 'csv')
+    DATABASE_PATH = os.path.join('db','music-player.db')
+    CSV_FOLDER = os.path.join('init_db','data', 'csv_new')
     import_playlists_from_csv(DATABASE_PATH, CSV_FOLDER)
 
 
