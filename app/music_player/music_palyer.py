@@ -28,14 +28,16 @@ class MusicPlayer:
         self.is_paused = False
         self.shuffle = False  # ✅ inizializzato
         self.on_song_change = on_song_change_callback
+        self.played_song_cache = set()
 
 
     def load_playlist(self, songs):
         """Carica una nuova playlist di canzoni."""
         self.stop()
         self.playlist = songs # -> songs preso da ui box
-        self.current_index = 0
-        self.play_current()
+        self.current_index = -1
+        self.played_song_cache.clear()
+        self.play_song_at_index(0)
 
     def play_song_at_index(self, index):
         if 0 <= index < len(self.playlist):
@@ -48,7 +50,13 @@ class MusicPlayer:
             return
 
         if self.shuffle:
-            self.current_index = random.randint(0, len(self.playlist) - 1)
+            unplayed_songs = [i for i in range(len(self.playlist)) if i not in self.played_song_cache]
+            if not unplayed_songs:
+                self.played_song_cache.clear()
+                unplayed_songs = list(range(len(self.playlist)))
+            
+            self.current_index = random.choice(unplayed_songs)
+            self.played_song_cache.add(self.current_index)
         else:
             self.current_index = (self.current_index + 1) % len(self.playlist)
 
@@ -68,6 +76,8 @@ class MusicPlayer:
         # il current index è -1 non fa niente
         if not self.playlist or not (0 <= self.current_index < len(self.playlist)):
             return
+        
+        self.played_song_cache.add(self.current_index)
 
         # definisce il cazzo di entry
         entry = self.playlist[self.current_index]
@@ -115,6 +125,7 @@ class MusicPlayer:
     def toggle_shuffle(self):
         """Attiva o disattiva la modalità shuffle."""
         self.shuffle = not self.shuffle
+        self.played_song_cache.clear()
         print(f"Modalità shuffle: {'attiva' if self.shuffle else 'disattivata'}")
 
     def stop(self):
@@ -123,6 +134,13 @@ class MusicPlayer:
     def set_volume(self, volume):
         """Imposta il volume (0-100)."""
         self.player.audio_set_volume(int(float(volume)))
+
+    def set_position(self, position):
+        """Sposta la posizione di riproduzione a un punto specifico (0.0 a 1.0)."""
+        if self.player.is_seekable():
+            # Assicura che la posizione sia nel range valido
+            position = max(0.0, min(1.0, position))
+            self.player.set_position(position)
 
     def shutdown(self):
         """Ferma la riproduzione e termina il thread di monitoraggio."""

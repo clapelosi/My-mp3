@@ -114,6 +114,7 @@ class App:
         self.progress_bar = ttk.Progressbar(info_frame, orient='horizontal',
                                             mode='determinate', style="dark.Horizontal.TProgressbar")
         self.progress_bar.pack(pady=5, fill='x', expand=True)
+        self.progress_bar.bind("<Button-1>", self.seek)
 
         # Frame per i controlli di riproduzione (play, pausa, etc.)
         controls_frame = Frame(left_frame, bg=settings.BACKGROUND_COLOR)
@@ -198,6 +199,15 @@ class App:
         self.song_box.config(yscrollcommand=scrollbar_songs.set)
 
         paned_window.add(songs_frame, weight=2)
+
+    def seek(self, event):
+        """Sposta la posizione di riproduzione in base al click sulla barra di progresso."""
+        if self.player.player.is_seekable():
+            # Calcola la nuova posizione (da 0.0 a 1.0)
+            clicked_x = event.x
+            bar_width = self.progress_bar.winfo_width()
+            new_position = clicked_x / bar_width
+            self.player.set_position(new_position)
 
     # === Metodi funzionali ===
     def load_playlists_from_db(self):
