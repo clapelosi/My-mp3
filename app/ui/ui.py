@@ -134,7 +134,8 @@ class App:
         self.play_pause_button.grid(row=0, column=1, padx=5)
         Button(controls_frame, text="⏭", font=button_font, command=self.player.next_track, **button_config).grid(row=0, column=2, padx=5)
         Button(controls_frame, text="⏹", font=button_font, command=self.player.stop, **button_config).grid(row=0, column=3, padx=5)
-        Button(controls_frame, text="🔀", font=button_font, command=self.toggle_shuffle_ui, **button_config).grid(row=0, column=4, padx=5)
+        self.shuffle_button = Button(controls_frame, text="🔀", font=button_font, command=self.toggle_shuffle_ui, **button_config)
+        self.shuffle_button.grid(row=0, column=4, padx=5)
 
         # Frame per il controllo del volume
         volume_frame = Frame(left_frame, bg=settings.BACKGROUND_COLOR)
@@ -304,18 +305,14 @@ class App:
     def toggle_play_pause(self):
         """Gestisce il click sul pulsante play/pausa."""
         self.player.toggle_pause()
-        new_text = "▶" if self.player.is_paused else "⏸"
+        new_text = "▶" if self.player.is_paused else "||"
         self.play_pause_button.config(text=new_text)
 
     def toggle_shuffle_ui(self):
         """Attiva/disattiva la modalità shuffle e aggiorna il colore del bottone."""
         self.player.toggle_shuffle()
-        new_color = settings.PRIMARY_COLOR if self.player.shuffle else settings.TEXT_COLOR
-        # Trova il bottone shuffle e cambia il colore del testo
-        for widget in self.root.winfo_children():
-            for subwidget in widget.winfo_children():
-                if isinstance(subwidget, Button) and subwidget.cget("text") == "🔀":
-                    subwidget.config(fg=new_color)
+        new_color = settings.PRIMARY_COLOR if self.player.shuffle else settings.COMPONENT_BACKGROUND
+        self.shuffle_button.config(bg=new_color)
 
     def update_progress(self):
         """Aggiorna la barra di progresso e il tempo di riproduzione."""
