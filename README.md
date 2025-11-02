@@ -1,97 +1,104 @@
+# Music Player Database
 
-# Music Player DB
+This is a sophisticated desktop music player built in Python, utilizing `tkinter` for the graphical user interface and `vlc` for audio playback. Unlike traditional file-based players, this project uses an SQLite database to manage songs and playlists, allowing for more powerful and structured management of your music library.
 
-Questo è un lettore musicale desktop sofisticato costruito in Python con `tkinter` per l'interfaccia grafica e `vlc` per la riproduzione audio. A differenza dei lettori tradizionali basati su file, questo progetto utilizza un database SQLite per gestire le canzoni e le playlist, permettendo una gestione più potente e strutturata della libreria musicale.
+## Features
 
-## Caratteristiche
+-   **Database-Driven Management:** Your entire music library and playlists are stored in an SQLite database.
+-   **Playlist Import:** A dedicated script allows for importing playlists from CSV files.
+-   **Intuitive Graphical Interface:** A two-column UI displays playback controls and album art on the left, with available playlists on the right.
+-   **Modular Codebase:** The code is structured to separate application logic, settings, and utility functions for better maintainability.
 
-- **Gestione a Database:** Tutta la libreria musicale e le playlist sono memorizzate in un database SQLite.
-- **Importazione Playlist:** Uno script dedicato permette di importare playlist da file CSV.
-- **Interfaccia Grafica Semplice:** Una UI a due colonne mostra i controlli di riproduzione e la copertina a sinistra, e le playlist disponibili a destra.
-- **Codice Modulare:** Il codice è stato strutturato per separare la logica dell'applicazione, le impostazioni e le funzioni di utilità.
-
-## Struttura del Progetto
+## Project Structure
 
 ```
-new_music-player/
-│
-├── app/                  # Codice sorgente dell'applicazione
+My-mp3/
+├── app/                      # Application source code
 │   ├── __init__.py
-│   ├── music_viewer.py   # File principale con la logica della UI
-│   ├── settings.py       # File di configurazione (percorsi, colori, font)
-│   └── utils/            # Funzioni di utilità
-│       └── __init__.py
-│
-├── data/                 # Dati grezzi e CSV
-│   └── csv/              # File CSV contenenti le playlist
-│
-├── venv/                 # Ambiente virtuale Python (ignorato da git)
-│
-├── import_playlists.py   # Script per importare i CSV nel database
-├── music-player.db       # Database SQLite
-├── requirements.txt      # Dipendenze Python del progetto
-└── README.md             # Questo file
+│   ├── main.py               # Main application entry point
+│   ├── resources.py          # UI resources (icons, images, etc.)
+│   ├── settings.py           # Configuration settings (paths, colors, fonts)
+│   ├── tests.py              # Unit tests for the application
+│   ├── music_player/         # Core music playback logic
+│   │   ├── __init__.py
+│   │   └── music_player.py
+│   ├── ui/                   # User interface components
+│   │   ├── __init__.py
+│   │   └── ui.py
+│   └── utils/                # Utility functions
+│       ├── __init__.py
+│       └── queries.py        # Database query functions
+├── db/                       # Database related files (e.g., SQLite database file)
+├── .gitignore                # Specifies intentionally untracked files to ignore
+├── .python-version           # Specifies the Python version to use (e.g., with pyenv)
+├── poetry.lock               # Poetry lock file for dependency management
+├── pyproject.toml            # Poetry project configuration
+├── README.md                 # This documentation file
+└── requirements.txt          # Pip requirements file (generated from poetry)
 ```
 
-## Installazione
+## Installation
 
-Per far funzionare l'applicazione, è necessario avere Python 3, VLC e alcune librerie Python installate.
+To get the application running, you will need Python 3, VLC, and the project's Python dependencies. This project uses `poetry` for dependency management.
 
-### 1. Prerequisiti di Sistema
+### 1. System Prerequisites
 
-- **Python 3:** Assicurati di avere Python 3 installato.
-- **VLC Media Player:** L'applicazione dipende da VLC. Installalo sul tuo sistema:
-  ```bash
-  # Su sistemi basati su Debian/Ubuntu
-  sudo apt-get update
-  sudo apt-get install -y vlc
-  ```
-- **Tkinter:** La libreria per la UI grafica. Di solito è inclusa con Python, ma su alcuni sistemi Linux va installata a parte:
-  ```bash
-  # Su sistemi basati su Debian/Ubuntu
-  sudo apt-get install -y python3-tk
-  ```
-
-### 2. Configurazione del Progetto
-
-1.  **Clona il repository (se fosse su git) o scarica i file.**
-
-2.  **Crea e attiva un ambiente virtuale:**
-    Questo isola le dipendenze del progetto.
+-   **Python 3:** Ensure you have Python 3 installed on your system.
+-   **VLC Media Player:** The application depends on VLC. Install it on your system:
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate
+    # On Debian/Ubuntu based systems
+    sudo apt-get update
+    sudo apt-get install -y vlc
+    ```
+-   **Tkinter:** The graphical UI library. It's usually included with Python, but on some Linux systems, it needs to be installed separately:
+    ```bash
+    # On Debian/Ubuntu based systems
+    sudo apt-get install -y python3-tk
     ```
 
-3.  **Installa le dipendenze Python:**
-    Usa il file `requirements.txt` per installare tutte le librerie necessarie.
+### 2. Project Setup
+
+1.  **Clone the repository (if applicable) or download the files.**
+
+2.  **Install Poetry (if you don't have it):**
     ```bash
-    pip install -r requirements.txt
+    pip install poetry
     ```
 
-### 3. Popolamento del Database
-
-Prima di avviare l'app, devi importare i dati nel database. Esegui gli script in **ordine**: prima le canzoni, poi le playlist.
-
-1.  **Importa le canzoni:**
-    Esegui lo script `import_songs.py` per creare e popolare la tabella `songs` con i metadati, inclusi i percorsi dei file musicali e delle copertine.
+3.  **Install project dependencies using Poetry:**
+    This will create a virtual environment and install all necessary libraries.
     ```bash
-    ./venv/bin/python import_songs.py
+    poetry install
     ```
 
-2.  **Importa le playlist:**
-    Successivamente, esegui `import_playlists.py` per collegare le canzoni appena importate alle rispettive playlist.
+4.  **Activate the Poetry shell:**
     ```bash
-    ./venv/bin/python import_playlists.py
+    poetry shell
     ```
-- Questo script creerà le tabelle necessarie e popolerà il database con i dati delle playlist trovate nella cartella `data/csv/`.
 
-## Avvio dell'Applicazione
+### 3. Database Population
 
-Una volta completata l'installazione e l'importazione dei dati, puoi avviare il lettore musicale:
+Before launching the app, you need to import your music data into the database. Run the scripts in the following order: first songs, then playlists.
+
+1.  **Import Songs:**
+    Execute the `import_songs.py` script to create and populate the `songs` table with metadata, including paths to your music files and album art.
+    ```bash
+    python init_db/import_songs.py
+    ```
+
+2.  **Import Playlists:**
+    Next, run `import_playlists.py` to link the imported songs to their respective playlists.
+    ```bash
+    python init_db/import_playlists.py
+    ```
+    -   This script will create the necessary tables and populate the database with playlist data found in the `init_db/data/csv/` folder.
+
+## Launching the Application
+
+Once installation and data import are complete, you can start the music player:
 
 ```bash
-./venv/bin/python app/music_viewer.py
+poetry run python app/main.py
 ```
 
-Si aprirà una finestra dove potrai vedere la lista delle tue playlist sulla destra. Fai doppio clic su una playlist per caricarla e avviare la riproduzione della prima canzone.
+A window will open displaying your playlist list on the right. Double-click a playlist to load it and start playback of the first song.
