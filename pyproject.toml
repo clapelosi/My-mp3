@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "My-mp3"
+version = "0.0.1"
+description = "My-mp3"
+authors = ["cla.pelosi <cla.pelosi.10@gmail.com>"]
+packages = [
+    { include = "app" }
+]
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[tool.poetry.dependencies]
+python = "~3.12.3"
+
+## Public
+click = ">=7.0"
+python-dotenv = "1.0.0"
+PyYAML = "^6.0"
+python-snappy = "0.7.3"
+pandas = "*"
+botocore = "^1.32.6"
+numpy = "1.26.4"
+python-vlc = "*"
+Pillow = "*"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+cookiecutter = "*"
+flake8 = "*"
+graphviz = "*"
+isort = "*"
+yapf = "*"
+pytest = "^8.2.2"
+hypothesis = "^6.100.2"
+notebook = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run_cmd = "bin.run_cmd:cli"
+scaffold = "bin.scaffold:cli"

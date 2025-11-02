@@ -14,6 +14,8 @@ def load_image(path, size):
     except Exception as e:
         print(f"Errore durante il caricamento dell'immagine {path}: {e}")
         return None
+
+
 def format_time(ms):
     """Converte millisecondi in formato MM:SS."""
     if ms is None or ms < 0:
