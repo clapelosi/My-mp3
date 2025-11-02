@@ -77,6 +77,9 @@ class MusicPlayer:
             file_path, song_title = entry
             cover_path = None
 
+        elif len(entry) >= 4:
+            file_path, song_title, cover_path, artists = entry[:4]
+
         # diversemnte prende i primi 3 
         elif len(entry) >= 3:
             file_path, song_title, cover_path = entry[:3]

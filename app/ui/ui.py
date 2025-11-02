@@ -91,7 +91,8 @@ class App:
         left_frame = Frame(main_frame, bg=settings.BACKGROUND_COLOR)
         left_frame.pack(side='left', fill='both', expand=True, padx=(0, 10))
 
-        # Frame per la copertina dell'album
+        # Frame per la copertina dell'album -> voglio che sia auto espanding?? ovvero che occupi 
+        # tutta la schermata
         cover_frame = Frame(left_frame, bg=settings.BACKGROUND_COLOR)
         cover_frame.pack(pady=10, fill='both', expand=True)
 
@@ -227,11 +228,11 @@ class App:
             cursor = self.db_conn.cursor()
             cursor.execute("""
                 SELECT 
-                    s.song_id, -- index 0
-                    s.title, -- index 1
-                    s.mp4_path, -- index 2
-                    s.copertina_640_path AS cover_path -- index 3,
-                    s.artists  -- index 4
+                    s.song_id,
+                    s.title,
+                    s.mp4_path,
+                    s.copertina_640_path AS cover_path,
+                    s.artists
                 FROM songs s
                 JOIN playlist_songs ps ON s.song_id = ps.song_id
                 WHERE ps.playlist_id = ?
@@ -241,7 +242,10 @@ class App:
             self.current_song_list = cursor.fetchall()
 
             self.song_box.delete(0, 'end')  # Pulisce la lista delle canzoni
-            for _, title, _, _ in self.current_song_list:
+
+            # carichiamo i nuovi dati dentro song_box
+            # for song_id, title, mp4_path, cover_path, artists??
+            for _, title, _, _, _ in self.current_song_list:
                 self.song_box.insert('end', title)
 
         except Exception as e:
@@ -253,7 +257,7 @@ class App:
         if not selected_indices:
             return
         
-        song_index = selected_indices[0]
+        song_index = selected_indices[0] ## sono gli indeci del song_box??
         # Prepara la lista di canzoni per il player
         songs_for_player = [(s[2], s[1], s[3], s[4]) for s in self.current_song_list]
         self.player.load_playlist(songs_for_player)
@@ -261,7 +265,12 @@ class App:
 
     def update_ui_for_song(self, file_path, song_title, index):
         """Aggiorna l'interfaccia utente (titolo, copertina, selezione) per la canzone corrente."""
-        self.song_title_var.set(song_title)
+        artists = ""
+        if hasattr(self, 'current_song_list') and 0 <= index < len(self.current_song_list):
+            artists = self.current_song_list[index][4] or ""  # campo artists nel DB
+        display_title = f"{song_title} - {artists}" if artists else song_title
+        self.song_title_var.set(display_title)
+
 
         cover_path = None
         if hasattr(self, 'current_song_list') and 0 <= index < len(self.current_song_list):
