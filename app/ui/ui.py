@@ -47,7 +47,7 @@ class App:
         self.playlists = []  # Lista per memorizzare le playlist come tuple (id, name)
 
         # Istanza del lettore musicale
-        self.player = MusicPlayer(self.update_ui_for_song)
+        self.player = MusicPlayer(self.update_ui_for_song, self.update_play_pause_button)
 
         # Impostazione degli stili e creazione dei widget
         self.setup_styles()
@@ -80,7 +80,20 @@ class App:
                         bordercolor=settings.BACKGROUND_COLOR)
         # Stili globali per Label e Frame
         style.configure("TLabel", background=settings.BACKGROUND_COLOR, foreground=settings.TEXT_COLOR)
-        style.configure("TFrame", background=settings.BACKGROUND_COLOR)
+        # Stile per il Treeview (lista canzoni)
+        style.configure("Treeview",
+                        background=settings.COMPONENT_BACKGROUND,
+                        foreground=settings.TEXT_COLOR,
+                        fieldbackground=settings.COMPONENT_BACKGROUND,
+                        bordercolor=settings.BACKGROUND_COLOR,
+                        rowheight=45) # Aumenta l'altezza della riga per le copertine
+        style.map("Treeview",
+                  background=[('selected', settings.PRIMARY_COLOR)],
+                  foreground=[('selected', settings.TEXT_COLOR)])
+        style.configure("Treeview.Heading",
+                        background=settings.COMPONENT_BACKGROUND,
+                        foreground=settings.TEXT_COLOR,
+                        font=(settings.FONT_FAMILY, settings.FONT_SIZE_PLAYLIST, "bold"))
 
     def create_widgets(self):
         """Crea e posiziona tutti i widget nell'interfaccia utente."""
@@ -134,6 +147,7 @@ class App:
         self.play_pause_button = Button(controls_frame, text="▶", font=button_font,
                                         command=self.toggle_play_pause, **button_config)
         self.play_pause_button.grid(row=0, column=1, padx=5)
+        self.play_pause_button.config(text="▶" if self.player.is_paused else "||") # Inizializza il testo del bottone
         Button(controls_frame, text="⏭", font=button_font, command=self.player.next_track, **button_config).grid(row=0, column=2, padx=5)
         Button(controls_frame, text="⏹", font=button_font, command=self.player.stop, **button_config).grid(row=0, column=3, padx=5)
         self.shuffle_button = Button(controls_frame, text="🔀", font=button_font, command=self.toggle_shuffle_ui, **button_config)
@@ -162,7 +176,7 @@ class App:
 
         # Frame per la lista delle playlist
         playlist_frame = Frame(paned_window, bg=settings.BACKGROUND_COLOR)
-        Label(playlist_frame, text="My Playlists",
+        Label(playlist_frame, text="> My Playlists",
               font=(settings.FONT_FAMILY, 14), fg=settings.TEXT_COLOR,
               bg=settings.BACKGROUND_COLOR).pack(pady=(0, 5))
 
@@ -183,21 +197,28 @@ class App:
 
         # Frame per la lista delle canzoni
         songs_frame = Frame(paned_window, bg=settings.BACKGROUND_COLOR)
-        Label(songs_frame, text="Canzoni 🎵", font=(settings.FONT_FAMILY, 14),
+        Label(songs_frame, text="> Current Playlist Songs", font=(settings.FONT_FAMILY, 14),
               fg=settings.TEXT_COLOR, bg=settings.BACKGROUND_COLOR).pack(pady=(0, 5))
 
         songs_container = Frame(songs_frame)
         songs_container.pack(fill='both', expand=True)
 
-        self.song_box = Listbox(songs_container, bg=settings.COMPONENT_BACKGROUND, fg=settings.TEXT_COLOR,
-                                selectbackground=settings.PRIMARY_COLOR, highlightthickness=0, border=0,
-                                font=(settings.FONT_FAMILY, settings.FONT_SIZE_PLAYLIST), exportselection=False)
+        self.song_box = ttk.Treeview(songs_container, columns=('Title',), show='tree headings',
+                                     selectmode='browse', style="Treeview")
+        self.song_box.heading('#0', text='Cover', anchor='w')
+        self.song_box.heading('Title', text='Song Title', anchor='w')
+        self.song_box.column('#0', width=50, stretch=False) # Column for the image
+        self.song_box.column('Title', stretch=True) # Column for the song title
+
         self.song_box.pack(side='left', fill='both', expand=True)
         self.song_box.bind("<Double-1>", self.play_selected_song)
 
         scrollbar_songs = Scrollbar(songs_container, orient='vertical', command=self.song_box.yview)
         scrollbar_songs.pack(side='right', fill='y')
         self.song_box.config(yscrollcommand=scrollbar_songs.set)
+
+        # Store references to PhotoImage objects to prevent garbage collection
+        self.song_cover_images = {}
 
         paned_window.add(songs_frame, weight=2)
 
@@ -253,23 +274,50 @@ class App:
             # cursor.execute(GET_SONGS_FROM_PLAYLIST_QUERY, (playlist_id,))
             self.current_song_list = cursor.fetchall()
 
-            self.song_box.delete(0, 'end')  # Pulisce la lista delle canzoni
+            self.song_box.delete(*self.song_box.get_children())
+            self.song_cover_images = {}
 
-            # carichiamo i nuovi dati dentro song_box
-            # for song_id, title, mp4_path, cover_path, artists??
-            for _, title, _, _, _ in self.current_song_list:
-                self.song_box.insert('end', title)
+            for song_id, title, mp4_path, cover_path, artists in self.current_song_list:
+                thumbnail_image = None
+                if cover_path and os.path.exists(cover_path):
+                    try:
+                        img = Image.open(cover_path)
+                        img.thumbnail((40, 40))  # Dimensione della miniatura
+                        thumbnail_image = ImageTk.PhotoImage(img)
+                        self.song_cover_images[song_id] = thumbnail_image # Store reference
+                    except Exception as e:
+                        print(f"Errore caricamento miniatura copertina per {title}: {e}")
+                
+                # Se non c'è una copertina valida, usa un placeholder
+                if not thumbnail_image:
+                    placeholder = PhotoImage(width=40, height=40)
+                    self.song_cover_images[song_id] = placeholder
+                    thumbnail_image = placeholder
+
+                self.song_box.insert('', 'end', iid=song_id, text='', image=thumbnail_image, values=(title,))
 
         except Exception as e:
             print(f"Errore nel caricare le canzoni della playlist: {e}")
 
     def play_selected_song(self, event=None):
         """Avvia la riproduzione della canzone selezionata dalla lista."""
-        selected_indices = self.song_box.curselection()
-        if not selected_indices:
+        selected_item_id = self.song_box.selection()
+        if not selected_item_id:
             return
         
-        song_index = selected_indices[0] ## sono gli indeci del song_box??
+        # Il Treeview restituisce una tupla di ID selezionati, prendiamo il primo
+        selected_song_id = selected_item_id[0]
+        
+        song_index = -1
+        for i, song_data in enumerate(self.current_song_list):
+            if str(song_data[0]) == selected_song_id: # song_data[0] è il song_id
+                song_index = i
+                break
+
+        if song_index == -1:
+            print(f"Errore: Song ID {selected_song_id} non trovato nella lista corrente.")
+            return
+
         # Prepara la lista di canzoni per il player
         songs_for_player = [(s[2], s[1], s[3], s[4]) for s in self.current_song_list]
         self.player.load_playlist(songs_for_player)
@@ -307,17 +355,22 @@ class App:
                                        fg=settings.TEXT_COLOR, compound='center')
             self.cover_label.image = placeholder
 
-        # Aggiorna la selezione nella lista delle canzoni
-        self.song_box.selection_clear(0, 'end')
-        self.song_box.selection_set(index)
-        self.song_box.activate(index)
-        self.song_box.see(index)  # Assicura che la canzone selezionata sia visibile
+        # Aggiorna la selezione nella lista delle canzoni (Treeview)
+        if hasattr(self, 'current_song_list') and 0 <= index < len(self.current_song_list):
+            current_song_id = str(self.current_song_list[index][0]) # Ottieni l'iid (song_id)
+            self.song_box.selection_remove(self.song_box.selection())
+            self.song_box.selection_add(current_song_id)
+            self.song_box.focus(current_song_id)
+            self.song_box.see(current_song_id)  # Assicura che la canzone selezionata sia visibile
+
+    def update_play_pause_button(self, is_paused):
+        """Aggiorna il testo del pulsante play/pausa in base allo stato di riproduzione."""
+        new_text = "▶" if is_paused else "||"
+        self.play_pause_button.config(text=new_text)
 
     def toggle_play_pause(self):
         """Gestisce il click sul pulsante play/pausa."""
         self.player.toggle_pause()
-        new_text = "▶" if self.player.is_paused else "||"
-        self.play_pause_button.config(text=new_text)
 
     def toggle_shuffle_ui(self):
         """Attiva/disattiva la modalità shuffle e aggiorna il colore del bottone."""

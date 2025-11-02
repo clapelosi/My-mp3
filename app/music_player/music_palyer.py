@@ -13,7 +13,7 @@ from app import utils
 
 
 class MusicPlayer:
-    def __init__(self, on_song_change_callback=None):
+    def __init__(self, on_song_change_callback=None, on_pause_toggle_callback=None):
 
         # player è il vlc
         self.player = vlc.MediaPlayer()
@@ -28,6 +28,7 @@ class MusicPlayer:
         self.is_paused = False
         self.shuffle = False  # ✅ inizializzato
         self.on_song_change = on_song_change_callback
+        self.on_pause_toggle = on_pause_toggle_callback # Nuovo callback
         self.played_song_cache = set()
 
 
@@ -121,6 +122,9 @@ class MusicPlayer:
         else:
             self.player.pause()
             self.is_paused = True
+        
+        if self.on_pause_toggle:
+            self.on_pause_toggle(self.is_paused)
 
     def toggle_shuffle(self):
         """Attiva o disattiva la modalità shuffle."""
